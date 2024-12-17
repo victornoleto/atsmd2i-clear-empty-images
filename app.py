@@ -79,9 +79,16 @@ def process_pass(pass_):
 
 def process(folder):
 
-	t0 = time.time()
-
 	path = storage_dir + '/' + folder
+	folder_parts = folder.split('/')
+
+	if len(folder_parts) < 4:
+		folder_children = os.listdir(path)
+		for folder_child in folder_children:
+			process(folder + '/' + folder_child)
+		return
+
+	t0 = time.time()
 
 	Log.debug('Iniciando processamento da pasta: ' + path)
 
@@ -158,7 +165,7 @@ def process(folder):
 			t0 = time.time()
 			process_pass(pass_)
 			elapsed = round(time.time() - t0, 2)
-			Log.debug(f'[PROCESS] Processado {index + 1}/{len(passes)} - {elapsed}s')
+			Log.debug(f'[PROCESS] Processado {folder} {index + 1}/{len(passes)} - {elapsed}s')
 		except Exception as e:
 			Log.error(f'[PROCESS] Erro ao processar passagem ({pass_}): {e}')
 

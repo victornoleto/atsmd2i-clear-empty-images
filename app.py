@@ -78,15 +78,27 @@ def process_pass(pass_):
 		if 'image_amb2' in pass_ and pass_['image_amb2']:
 			remove_file(pass_['image_amb2'], pass_id)
 
+def remove_empty(path):
+	Log.debug('Removendo pastas vazias: ' + path)
+	subprocess.run(['find', path, '-empty', '-type', 'd', '-delete'])
+
 def process(folder):
 
 	path = storage_dir + '/' + folder
+
+	if not os.path.exists(path):
+		raise Exception('Pasta não encontrada: ' + path)
+
 	folder_parts = folder.split('/')
 
 	if len(folder_parts) < 4:
+
 		folder_children = os.listdir(path)
+
 		for folder_child in folder_children:
 			process(folder + '/' + folder_child)
+
+		remove_empty(path)
 		return
 
 	t0 = time.time()
@@ -170,8 +182,7 @@ def process(folder):
 				Log.error(f'[PROCESS] Erro ao processar passagem ({pass_}): {e}')
 
 	# remover pastas vazias
-	print(path)
-	subprocess.run(['find', path, '-empty', '-type', 'd', '-delete'])
+	remove_empty(path)
 
 dblite.init()
 

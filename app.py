@@ -21,7 +21,7 @@ def remove_file(file, pass_id = None):
 
 	try:
 
-		#os.remove(file)
+		os.remove(file)
 
 		row = {
 			'path': file,
@@ -30,7 +30,7 @@ def remove_file(file, pass_id = None):
 		}
 
 		dblite.insert('history', row)
-		
+
 		Log.info(f'[REMOVE] Arquivo removido com sucesso: {file}')
 
 	except Exception as e:
@@ -38,7 +38,7 @@ def remove_file(file, pass_id = None):
 
 def process_pass(pass_):
 
-	t0 = time.time()
+	#t0 = time.time()
 
 	query = f'''
 	SELECT
@@ -61,9 +61,8 @@ def process_pass(pass_):
 	pass_db = db.find(query)
 	pass_id = pass_db['id'] if pass_db else None
 
-	elapsed = round(time.time() - t0, 2)
-
-	Log.debug(f'[PROCESS] Busca pela passagem: {pass_}: {elapsed}s')
+	#elapsed = round(time.time() - t0, 2)
+	#Log.debug(f'[PROCESS] Busca pela passagem: {pass_}: {elapsed}s')
 
 	remove_files = not pass_db or (datetime.datetime.now() - pass_db['measured_at']).days >= 3
 	
@@ -88,7 +87,7 @@ def process(folder):
 	# filter only files
 	files = [file for file in files if os.path.isfile(file)]
 
-	print(path, files)
+	Log.debug(f'Processando pasta: {path} - {len(files)} arquivos')
 
 	if len(files) == 0:
 		return
@@ -147,9 +146,13 @@ def process(folder):
 
 	passes = list(passes.values())
 
-	for pass_ in passes:
+	#for pass_ in passes:
+	for index, pass_ in enumerate(passes):
 		try:
+			t0 = time.time()
 			process_pass(pass_)
+			elapsed = round(time.time() - t0, 2)
+			Log.debug(f'[PROCESS] Processado {index + 1}/{len(passes)} - {elapsed}s')
 		except Exception as e:
 			Log.error(f'[PROCESS] Erro ao processar passagem ({pass_}): {e}')
 

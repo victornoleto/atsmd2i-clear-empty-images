@@ -79,15 +79,21 @@ def process_pass(pass_):
 
 def process(folder):
 
-	# get all files recursively
+	t0 = time.time()
+
 	path = storage_dir + '/' + folder
 
+	Log.debug('Iniciando processamento da pasta: ' + path)
+
+	# get all files recursively
 	files = glob.glob(path + '/**/*', recursive=True)
 
 	# filter only files
 	files = [file for file in files if os.path.isfile(file)]
 
-	Log.debug(f'Processando pasta: {path} - {len(files)} arquivos')
+	elapsed = round(time.time() - t0, 2)
+
+	Log.debug(f'Processando pasta: {path}, {len(files)} arquivos - {elapsed}s')
 
 	if len(files) == 0:
 		return

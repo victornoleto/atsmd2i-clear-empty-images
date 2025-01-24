@@ -49,13 +49,13 @@ def process_pass(pass_):
 		p.image_amb1,
 		p.image_amb2
 	FROM passes as p
-	LEFT JOIN pass_irregularities pi ON pi.pass_id = p.id
 	WHERE
 		p.site_id = {pass_['site_id']}
 		AND p.detection_id = {pass_['detection_id']}
 		AND p.measured_at = '{pass_['measured_at']}'
 		AND p.plate = '{pass_['plate']}'
-		AND pi.id IS NULL
+		AND p.assessment_date IS NULL
+		AND NOT EXISTS (SELECT pi.id FROM pass_irregularities as pi WHERE pi.pass_id = p.id LIMIT 1)
 	LIMIT 1
     '''
 
@@ -94,6 +94,7 @@ def process(folder):
 	if len(folder_parts) < 4:
 
 		folder_children = os.listdir(path)
+  		folder_children.sort()
 
 		for folder_child in folder_children:
 			process(folder + '/' + folder_child)

@@ -39,7 +39,7 @@ def remove_file(file, pass_id = None):
 
 def process_pass(pass_):
 
-	#t0 = time.time()
+	t0 = time.time()
 
 	query = f'''
 	SELECT
@@ -64,8 +64,12 @@ def process_pass(pass_):
 	pass_db = db.find(query)
 	pass_id = pass_db['id'] if pass_db else None
 
-	#elapsed = round(time.time() - t0, 2)
-	#Log.debug(f'[PROCESS] Busca pela passagem: {pass_}: {elapsed}s')
+	if pass_db:
+		pass_['id'] = pass_id
+		pass_['has_irregularity'] = pass_db['has_irregularity']
+
+	elapsed = round(time.time() - t0, 2)
+	Log.debug(f'[PROCESS] Busca pela passagem: {pass_}: {elapsed}s')
 
 	remove_files = not pass_db or (not pass_db['has_irregularity'] and (datetime.datetime.now() - pass_db['measured_at']).days >= 3)
 	
@@ -96,7 +100,7 @@ def process(folder):
 	if len(folder_parts) < 4:
 
 		folder_children = os.listdir(path)
-  		folder_children.sort()
+		folder_children.sort()
 
 		for folder_child in folder_children:
 			process(folder + '/' + folder_child)

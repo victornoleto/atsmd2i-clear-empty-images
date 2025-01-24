@@ -47,15 +47,17 @@ def process_pass(pass_):
 		p.measured_at,
 		p.image_zoom,
 		p.image_amb1,
-		p.image_amb2
+		p.image_amb2,
+  		(
+			p.assessment_date IS NOT NULL
+			OR EXISTS (SELECT pi.id FROM pass_irregularities as pi WHERE pi.pass_id = p.id LIMIT 1)
+		) as has_irregularity
 	FROM passes as p
 	WHERE
 		p.site_id = {pass_['site_id']}
 		AND p.detection_id = {pass_['detection_id']}
 		AND p.measured_at = '{pass_['measured_at']}'
 		AND p.plate = '{pass_['plate']}'
-		AND p.assessment_date IS NULL
-		AND NOT EXISTS (SELECT pi.id FROM pass_irregularities as pi WHERE pi.pass_id = p.id LIMIT 1)
 	LIMIT 1
     '''
 
@@ -65,7 +67,7 @@ def process_pass(pass_):
 	#elapsed = round(time.time() - t0, 2)
 	#Log.debug(f'[PROCESS] Busca pela passagem: {pass_}: {elapsed}s')
 
-	remove_files = not pass_db or (datetime.datetime.now() - pass_db['measured_at']).days >= 3
+	remove_files = not pass_db or (not pass_db['has_irregularity'] and (datetime.datetime.now() - pass_db['measured_at']).days >= 3)
 	
 	if remove_files:
 

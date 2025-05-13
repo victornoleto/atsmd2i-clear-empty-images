@@ -41,6 +41,16 @@ def process_pass(pass_):
 
 	t0 = time.time()
 
+	# convert measured_at to date object
+	date_obj = datetime.datetime.strptime(pass_['measured_at'], '%Y-%m-%d %H:%M:%S')
+	
+	# remove 5 seconds
+	min_date = date_obj - datetime.timedelta(seconds=5)
+	max_date = date_obj + datetime.timedelta(seconds=5)
+
+	min_date_format = min_date.strftime('%Y-%m-%d %H:%M:%S')
+	max_date_format = max_date.strftime('%Y-%m-%d %H:%M:%S')
+
 	query = f'''
 	SELECT
 		p.id,
@@ -56,10 +66,12 @@ def process_pass(pass_):
 	WHERE
 		p.site_id = {pass_['site_id']}
 		AND p.detection_id = {pass_['detection_id']}
-		AND p.measured_at = '{pass_['measured_at']}'
 		AND p.plate = '{pass_['plate']}'
+		AND p.measured_at >= '{min_date_format}'
+		AND p.measured_at <= '{max_date_format}'
 	LIMIT 1
     '''
+	#AND p.measured_at = '{pass_['measured_at']}'
 
 	pass_db = db.find(query)
 	pass_id = pass_db['id'] if pass_db else None

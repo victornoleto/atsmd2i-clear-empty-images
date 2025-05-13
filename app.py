@@ -131,6 +131,10 @@ def process(folder):
 			filename = file.split('/')[-1]
 			parts = filename.split('-')
 
+			if len(parts) == 6 and len(parts[0]) == 13:
+				# remove the first part
+				parts = parts[1:]
+
 			if 'thumb' in file:
 				remove_file(file)
 				continue
